@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity ^0.8.17;
+pragma solidity 0.8.17;
 
 // NFT contract to inherit from.
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
@@ -13,6 +13,9 @@ import "./libraries/Base64.sol";
 import "hardhat/console.sol";
 
 contract MyEpicGame is ERC721 {
+    uint randNonce = 0; // this is used to help ensure that the algorithm has different inputs every time
+    error MyEpicGame_CharactersNotHaveHP();
+    error MyEpicGame_BossNotHaveHP();
     //  The tokenId is the NFTs unique identifier, it's just a number that goes
     // 0, 1, 2, 3, etc.
     using Counters for Counters.Counter;
@@ -40,13 +43,28 @@ contract MyEpicGame is ERC721 {
     // to store the owner of the NFT and reference it later.
     mapping(address => uint256) public nftHolders;
 
+    // The Boss
+    struct BigBoss {
+        string name;
+        string imageURI;
+        uint hp;
+        uint maxHp;
+        uint attackDamage;
+    }
+
+    BigBoss public bigBoss;
+
     // Data passed in to the contract when it's first created initializing the characters.
     // We're going to actually pass these values in from run.js.
     constructor(
         string[] memory characterNames,
         string[] memory characterImageURIs,
         uint[] memory characterHp,
-        uint[] memory characterAttackDmg
+        uint[] memory characterAttackDmg,
+        string memory bossName, // These new variables would be passed in via run.js or deploy.js.
+        string memory bossImageURI,
+        uint bossHp,
+        uint bossAttackDamage
     ) ERC721("Players", "HERO") {
         for (uint i = 0; i < characterNames.length; i += 1) {
             defaultCharacters.push(
@@ -71,6 +89,36 @@ contract MyEpicGame is ERC721 {
         // I increment _tokenIds here so that my first NFT has an ID of 1.
         // More on this in the lesson!
         _tokenIds.increment();
+
+        // Initialize the boss. Save it to our global "bigBoss" state variable.
+        bigBoss = BigBoss({
+            name: bossName,
+            imageURI: bossImageURI,
+            hp: bossHp,
+            maxHp: bossHp,
+            attackDamage: bossAttackDamage
+        });
+
+        console.log(
+            "Done initializing boss %s w/ HP %s, img %s",
+            bigBoss.name,
+            bigBoss.hp,
+            bigBoss.imageURI
+        );
+    }
+
+    function randomInt(uint _modulus) internal returns (uint) {
+        randNonce++; // increase nonce
+        return
+            uint(
+                keccak256(
+                    abi.encodePacked(
+                        block.timestamp, // an alias for 'block.timestamp'
+                        msg.sender, // your address
+                        randNonce
+                    )
+                )
+            ) % _modulus; // modulo using the _modulus argument
     }
 
     // Users would be able to hit this function and get their NFT based on the
@@ -145,5 +193,52 @@ contract MyEpicGame is ERC721 {
         );
 
         return output;
+    }
+
+    function attackBoss() public {
+        uint256 nftTokenIdOfPlayer = nftHolders[msg.sender];
+        CharacterAttributes storage player = nftHolderAttributes[
+            nftTokenIdOfPlayer
+        ];
+        // Make sure the player has more than 0 HP.
+
+        if (player.hp > 0) {
+            revert MyEpicGame_CharactersNotHaveHP();
+        }
+
+        // Make sure the boss has more than 0 HP.
+        if (bigBoss.hp > 0) {
+            revert MyEpicGame_BossNotHaveHP();
+        }
+
+        console.log(
+            "\nPlayer w/ character %s about to attack. Has %s HP and %s AD",
+            player.name,
+            player.hp,
+            player.attackDamage
+        );
+        console.log(
+            "Boss %s has %s HP and %s AD",
+            bigBoss.name,
+            bigBoss.hp,
+            bigBoss.attackDamage
+        );
+        // Allow player to attack boss.
+        if (bigBoss.hp < player.attackDamage) {
+            bigBoss.hp = 0;
+        } else {
+            bigBoss.hp = bigBoss.hp - player.attackDamage;
+        }
+
+        // Allow boss to attack player.
+        if (player.hp < bigBoss.attackDamage) {
+            player.hp = 0;
+        } else {
+            player.hp = player.hp - bigBoss.attackDamage;
+        }
+
+        // Console for ease.
+        console.log("Player attacked boss. New boss hp: %s", bigBoss.hp);
+        console.log("Boss attacked player. New player hp: %s\n", player.hp);
     }
 }
