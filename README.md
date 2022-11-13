@@ -1,1 +1,1 @@
-## Multi Slayer Game
+## Multi Player Game
