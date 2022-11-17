@@ -200,16 +200,6 @@ contract MyEpicGame is ERC721 {
         CharacterAttributes storage player = nftHolderAttributes[
             nftTokenIdOfPlayer
         ];
-        // Make sure the player has more than 0 HP.
-
-        if (player.hp > 0) {
-            revert MyEpicGame_CharactersNotHaveHP();
-        }
-
-        // Make sure the boss has more than 0 HP.
-        if (bigBoss.hp > 0) {
-            revert MyEpicGame_BossNotHaveHP();
-        }
 
         console.log(
             "\nPlayer w/ character %s about to attack. Has %s HP and %s AD",
@@ -223,11 +213,32 @@ contract MyEpicGame is ERC721 {
             bigBoss.hp,
             bigBoss.attackDamage
         );
+
+        // Make sure the player has more than 0 HP.
+        require(player.hp > 0, "Error: character must have HP to attack boss.");
+
+        // Make sure the boss has more than 0 HP.
+        require(
+            bigBoss.hp > 0,
+            "Error: boss must have HP to attack character."
+        );
+
         // Allow player to attack boss.
+        console.log("%s swings at %s...", player.name, bigBoss.name);
         if (bigBoss.hp < player.attackDamage) {
             bigBoss.hp = 0;
+            console.log("The boss is dead!");
         } else {
+            // if (randMod(10) > 5) {
             bigBoss.hp = bigBoss.hp - player.attackDamage;
+            console.log(
+                "%s attacked boss. New boss hp: %s",
+                player.name,
+                bigBoss.hp
+            );
+            // } else {
+            console.log("%s missed!\n", player.name);
+            // }
         }
 
         // Allow boss to attack player.

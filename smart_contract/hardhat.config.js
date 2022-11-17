@@ -9,6 +9,7 @@ const MATIC_RPC_URL = process.env.MATIC_RPC_URL;
 
 module.exports = {
   defaultNetwork: "hardhat",
+  allowUnlimitedContractSize: true,
   networks: {
     // goerli: {
     //   url: GOERLI_API_KEY,

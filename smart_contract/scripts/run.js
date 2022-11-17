@@ -1,27 +1,46 @@
 const main = async () => {
   const gameContractFactory = await hre.ethers.getContractFactory("MyEpicGame");
   const gameContract = await gameContractFactory.deploy(
-    ["Kohli", "Devilliers", "Gayle"], // Names
+    ["Steyn", "Starc", "Rabada"], // Names
     [
-      "https://i.imgur.com/GZLZxRU.jpeg", // Images
-      "https://i.imgur.com/dra2VhB.jpg",
-      "https://i.imgur.com/wI4ODDj.jpg",
+      "https://i.imgur.com/FAhXkof.jpg", // Images
+      "https://i.imgur.com/CuGxkUA.jpg",
+      "https://i.imgur.com/PzCMw2i.jpg",
     ],
     [300, 250, 200], // HP values
-    [200, 250, 270] // Attack damage values
+    [200, 250, 270], // Attack damage values
+    "Virat Kohli", // Boss name
+    "https://i.imgur.com/GZLZxRU.jpeg", // Boss image
+    5000, // Boss hp
+    50 // Boss attack damage
   );
   await gameContract.deployed();
   console.log("Contract Deployed to...", gameContract.address);
 
   let txn;
-  // We only have three characters.
-  // an NFT w/ the character at index 2 of our array.
-  txn = await gameContract.mintCharacterNFT(2);
+  txn = await gameContract.mintCharacterNFT(0);
+  await txn.wait();
+  console.log("Minted NFT #1");
+
+  txn = await gameContract.mintCharacterNFT(1);
+  await txn.wait();
+  console.log("Minted NFT #2");
+
+  // txn = await gameContract.mintCharacterNFT(2);
+  // await txn.wait();
+  // console.log("Minted NFT #3");
+
+  // txn = await gameContract.mintCharacterNFT(1);
+  // await txn.wait();
+  // console.log("Minted NFT #4");
+
+  txn = await gameContract.attackBoss();
   await txn.wait();
 
-  // Get the value of the NFT's URI.
-  let returnedTokenUri = await gameContract.tokenURI(1);
-  console.log("Token URI:", returnedTokenUri);
+  txn = await gameContract.attackBoss();
+  await txn.wait();
+
+  console.log("Done deploying and minting!");
 };
 const runMain = async () => {
   try {
