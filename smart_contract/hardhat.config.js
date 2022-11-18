@@ -1,5 +1,6 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
+require("hardhat-deploy");
 
 /** @type import('hardhat/config').HardhatUserConfig */
 
@@ -27,6 +28,11 @@ module.exports = {
     optimizer: {
       enabled: true,
       runs: 200,
+    },
+  },
+  namedAccounts: {
+    deployer: {
+      default: 0,
     },
   },
 };
