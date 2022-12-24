@@ -1,21 +1,20 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
-require("hardhat-deploy");
 
 /** @type import('hardhat/config').HardhatUserConfig */
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
-// const GOERLI_RPC_URL = process.env.GOERLI_RPC_URL;
+const GOERLI_RPC_URL = process.env.GOERLI_RPC_URL;
 const MATIC_RPC_URL = process.env.MATIC_RPC_URL;
 
 module.exports = {
   defaultNetwork: "hardhat",
   allowUnlimitedContractSize: true,
   networks: {
-    // goerli: {
-    //   url: GOERLI_API_KEY,
-    //   accounts: [GOERLI_PRIVATE_KEY],
-    // },
+    goerli: {
+      url: GOERLI_RPC_URL,
+      accounts: [PRIVATE_KEY],
+    },
     matic: {
       url: MATIC_RPC_URL,
       accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
