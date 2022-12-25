@@ -1,4 +1,14 @@
 export const contractAddress = "0x27b338eE49559DbfA3f857524637aEeC1E400635"
+export const transformCharacterData = (characterData) => {
+  return {
+    name: characterData.name,
+    imageURI: characterData.imageURI,
+    hp: characterData.hp.toNumber(),
+    maxHp: characterData.maxHp.toNumber(),
+    attackDamage: characterData.attackDamage.toNumber(),
+  };
+};
+
 
 export const contractABI = [
     {
